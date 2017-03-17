@@ -49,12 +49,10 @@ const styles = StyleSheet.create({
     height: DEVICE_WIDTH / 7,
     flexDirection: 'row',
   },
-  thursButton: {
-    width: Math.round(DEVICE_WIDTH / 7 * 4 ) - DEVICE_WIDTH / 7 * 3 , //dumb hack to fix irrational number spacing
-  },
   dayButtonFiller: {
     padding: 0,
     width: DEVICE_WIDTH / 7,
+    height: DEVICE_WIDTH / 7,
   },
   day: {
     fontSize: 16,
@@ -81,10 +79,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   currentDayCircle: {
-    backgroundColor: 'pink',
+    backgroundColor: '#F22169',
   },
   currentDayText: {
-    color: 'red',
+    color: 'black',
+    fontWeight: 'bold',
   },
   selectedDayCircle: {
     backgroundColor: '#F22169',
@@ -109,6 +108,12 @@ const styles = StyleSheet.create({
     width: DEVICE_WIDTH / 14,
     height: 28,
     backgroundColor: '#F22169',
+  },
+  selectedFadedRangeBar: {
+    width: DEVICE_WIDTH / 14,
+    height: 28,
+    backgroundColor: '#F22169',
+    opacity: 0.3,
   },
   emptyRangeBar: {
     width: DEVICE_WIDTH / 14,

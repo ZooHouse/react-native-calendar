@@ -11,6 +11,7 @@ import styles from './styles';
 export default class Day extends Component {
   static defaultProps = {
     customStyle: {},
+    fadedRange: false,
   }
 
   static propTypes = {
@@ -25,6 +26,7 @@ export default class Day extends Component {
     isInRange: PropTypes.bool,
     isStartRange: PropTypes.bool,
     isEndRange: PropTypes.bool,
+    fadedRange: PropTypes.bool,
     onPress: PropTypes.func,
     showEventIndicators: PropTypes.bool,
   }
@@ -32,11 +34,6 @@ export default class Day extends Component {
   dayButtonStyle = (isInRange, isThurs) => {
     const { customStyle } = this.props;
     const dayButtonStyle = [styles.dayButton, customStyle.dayButton];
-
-    // if (isThurs) {
-    //  dayButtonStyle.push(styles.thursButton);
-    // }
-
     return dayButtonStyle;
   }
 
@@ -76,9 +73,10 @@ export default class Day extends Component {
       dayTextStyle.push(styles.currentDayText, customStyle.currentDayText);
     } else if (isToday || isSelected) {
       dayTextStyle.push(styles.selectedDayText, customStyle.selectedDayText);
-    // } else if (isWeekend) {
-    //  dayTextStyle.push(styles.weekendDayText, customStyle.weekendDayText);
+    } else if (isWeekend) {
+      dayTextStyle.push(styles.weekendDayText, customStyle.weekendDayText);
     }
+
     if (isInRange || isStartRange || isEndRange) {
       dayTextStyle.push(styles.selectedDayText, customStyle.selectedDayText);
     }
@@ -101,6 +99,7 @@ export default class Day extends Component {
       isInRange,
       isStartRange,
       isEndRange,
+      fadedRange,
       showEventIndicators,
       } = this.props;
 
@@ -117,19 +116,32 @@ export default class Day extends Component {
           <View style={this.dayButtonStyle(isInRange, isThurs)}>
             {
               (isInRange || isEndRange) && !isStartRange ?
-                <View style={styles.selectedRangeBar} /> :
+                <View
+                  style={
+                    fadedRange ?
+                    styles.selectedFadedRangeBar :
+                    styles.selectedRangeBar
+                  } /> :
                 <View style={styles.emptyRangeBar} />
             }
             {
               (isInRange || isStartRange) && !isEndRange ?
-                <View style={styles.selectedRangeBar} /> :
+                <View
+                  style={
+                    fadedRange ?
+                    styles.selectedFadedRangeBar :
+                    styles.selectedRangeBar
+                  } /> :
                 <View style={styles.emptyRangeBar} />
             }
             <View
               style={this.dayCircleStyle(isWeekend, isSelected,
               isToday, isStartRange, isEndRange, event)}
             >
-              <Text style={this.dayTextStyle(isWeekend, isSelected, isToday, isInRange, event)}>
+              <Text
+                style={this.dayTextStyle(isWeekend, isSelected, isToday,
+                  isInRange, isStartRange, isEndRange, event)}
+              >
                 {caption}
               </Text>
             </View>

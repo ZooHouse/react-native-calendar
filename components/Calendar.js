@@ -59,6 +59,7 @@ class Calendar extends Component {
     today: PropTypes.any,
     weekStart: PropTypes.number,
     rangeEnabled: PropTypes.bool,
+    fadedRange: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -78,6 +79,7 @@ class Calendar extends Component {
     today: moment(),
     weekStart: 1,
     rangeEnabled: false,
+    fadedRange: false,
   };
 
   componentDidMount() {
@@ -221,6 +223,7 @@ class Calendar extends Component {
     const
       selectedMoment = moment(this.state.selectedMoment),
       rangeEnabled = this.props.rangeEnabled,
+      fadedRange = this.props.fadedRange,
       rangeStart = moment(this.state.rangeStart),
       rangeEnd = moment(this.state.rangeEnd),
       weekStart = this.props.weekStart,
@@ -266,6 +269,7 @@ class Calendar extends Component {
               (argIsStartMonth && dayIndex === rangeStartIndex)}
             isEndRange={rangeEnabled &&
               (argIsEndMonth && dayIndex === rangeEndIndex)}
+            fadedRange={fadedRange}
             event={events && events[dayIndex]}
             showEventIndicators={this.props.showEventIndicators}
             customStyle={this.props.customStyle}
