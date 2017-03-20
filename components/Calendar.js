@@ -21,7 +21,7 @@ function getNumberOfWeeks(month) {
   return lastWeek - firstWeek + 1;
 }
 
-export default class Calendar extends Component {
+class Calendar extends Component {
 
   state = {
     currentMonthMoment: moment(this.props.startDate),
@@ -59,6 +59,7 @@ export default class Calendar extends Component {
     today: PropTypes.any,
     weekStart: PropTypes.number,
     rangeEnabled: PropTypes.bool,
+    fadedRange: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -78,6 +79,7 @@ export default class Calendar extends Component {
     today: moment(),
     weekStart: 1,
     rangeEnabled: false,
+    fadedRange: false,
   };
 
   componentDidMount() {
@@ -221,6 +223,7 @@ export default class Calendar extends Component {
     const
       selectedMoment = moment(this.state.selectedMoment),
       rangeEnabled = this.props.rangeEnabled,
+      fadedRange = this.props.fadedRange,
       rangeStart = moment(this.state.rangeStart),
       rangeEnd = moment(this.state.rangeEnd),
       weekStart = this.props.weekStart,
@@ -260,11 +263,13 @@ export default class Calendar extends Component {
             isToday={argMonthIsToday && (dayIndex === todayIndex)}
             isSelected={selectedMonthIsArg && (dayIndex === selectedIndex)}
             isInRange={rangeEnabled &&
-            (argAfterStartMonth || argIsStartMonth && dayIndex >= rangeStartIndex) &&
-            (argBeforeEndMonth || argIsEndMonth && dayIndex <= rangeEndIndex)}
+            (argAfterStartMonth || argIsStartMonth && dayIndex > rangeStartIndex) &&
+            (argBeforeEndMonth || argIsEndMonth && dayIndex < rangeEndIndex)}
+            isStartRange={rangeEnabled &&
+              (argIsStartMonth && dayIndex === rangeStartIndex)}
             isEndRange={rangeEnabled &&
-              (argIsStartMonth && dayIndex === rangeStartIndex ||
-              argIsEndMonth && dayIndex === rangeEndIndex)}
+              (argIsEndMonth && dayIndex === rangeEndIndex)}
+            fadedRange={fadedRange}
             event={events && events[dayIndex]}
             showEventIndicators={this.props.showEventIndicators}
             customStyle={this.props.customStyle}
@@ -386,3 +391,5 @@ export default class Calendar extends Component {
     );
   }
 }
+
+export default Calendar;
