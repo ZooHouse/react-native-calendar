@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   selectedFadedRangeBar: {
     width: DEVICE_WIDTH / 14,
     height: 28,
-    backgroundColor: '#F22169',
+    backgroundColor: '#FFA8C1',
     opacity: 0.3,
   },
   emptyRangeBar: {
