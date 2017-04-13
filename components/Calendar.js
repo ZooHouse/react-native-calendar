@@ -26,6 +26,7 @@ class Calendar extends Component {
   state = {
     currentMonthMoment: moment(this.props.startDate),
     selectedMoment: moment(this.props.selectedDate),
+    selectedEndMoment: moment(this.props.selectedEndDate),
     rangeStart: moment(this.props.startDate),
     rangeEnd: moment(this.props.startDate),
     selectStartMode: true,
@@ -42,6 +43,7 @@ class Calendar extends Component {
       PropTypes.object
     ]),
     onDateSelect: PropTypes.func,
+    onEndDateSelect: PropTypes.func,
     onSwipeNext: PropTypes.func,
     onSwipePrev: PropTypes.func,
     onTouchNext: PropTypes.func,
@@ -52,6 +54,7 @@ class Calendar extends Component {
     ]),
     scrollEnabled: PropTypes.bool,
     selectedDate: PropTypes.any,
+    selectedEndDate: PropTypes.any,
     showControls: PropTypes.bool,
     showEventIndicators: PropTypes.bool,
     startDate: PropTypes.any,
@@ -94,6 +97,9 @@ class Calendar extends Component {
   componentWillReceiveProps(nextProps) {
     if (nextProps.selectedDate && this.props.selectedDate !== nextProps.selectedDate) {
       this.setState({selectedMoment: nextProps.selectedDate});
+    }
+    if (this.props.fadedRange && nextProps.selectedEndDate && this.props.selectedEndDate !== nextProps.selectedEndDate) {
+      this.setState({selectedEndMoment: nextProps.selectedEndDate});
     }
   }
 
@@ -169,7 +175,20 @@ class Calendar extends Component {
         rangeEnd,
         selectStartMode,
       });
+      if (rangeEnd === date) {
+        // If selected day is rangeEnd, run onEndDateSelect callback
+        this.props.onEndDateSelect && this.props.onEndDateSelect(date ? date.format() : null,
+          rangeStart ? rangeStart.format() : null,
+          rangeEnd ? rangeEnd.format() : null );
+      } else {
+        // If selected day is rangeStart, run onDateSelect callback
+        this.props.onDateSelect && this.props.onDateSelect(date ? date.format() : null,
+          rangeStart ? rangeStart.format() : null,
+          rangeEnd ? rangeEnd.format() : null );
+      }
+      return;
     }
+    // If range is disabled, run onDateSelect callback
     this.props.onDateSelect && this.props.onDateSelect(date ? date.format() : null,
       rangeStart ? rangeStart.format() : null,
       rangeEnd ? rangeEnd.format() : null );
