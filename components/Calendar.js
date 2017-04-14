@@ -29,7 +29,7 @@ class Calendar extends Component {
     selectedEndMoment: moment(this.props.selectedEndDate),
     rangeStart: moment(this.props.startDate),
     rangeEnd: moment(this.props.startDate),
-    selectStartMode: true,
+    selectStartDate: true,
     rowHeight: null,
   };
 
@@ -145,49 +145,52 @@ class Calendar extends Component {
     }
     let rangeStart = this.state.rangeStart,
       rangeEnd = this.state.rangeEnd,
-      selectStartMode = this.state.selectStartMode;
+      selectStartDate = this.state.selectStartDate;
 
-    if (this.props.rangeEnabled) {
-      let argBeforeStartMonth = argMoment.isBefore(rangeStart, 'month'),
-        argAfterStartMonth = argMoment.isAfter(rangeStart, 'month'),
-        argIsStartMonth = argMoment.isSame(rangeStart, 'month'),
-        argBeforeEndMonth = argMoment.isBefore(rangeEnd, 'month'),
-        argAfterEndMonth = argMoment.isAfter(rangeEnd, 'month'),
-        argIsEndMonth = argMoment.isSame(rangeEnd, 'month');
-      if (argBeforeStartMonth || argIsStartMonth && date < this.state.rangeStart) {
-        rangeStart = date;
-      } else if (argAfterEndMonth || argIsEndMonth && date > this.state.rangeEnd) {
-        rangeEnd = date;
-      } else if (argBeforeEndMonth && argAfterStartMonth
-        || argAfterStartMonth && argIsEndMonth && date < this.state.rangeEnd
-        || argBeforeEndMonth && argIsStartMonth && date > this.state.rangeStart
-        || argIsEndMonth && argIsStartMonth && date > this.state.rangeStart && date < this.state.rangeEnd) {
-
-        if (this.state.selectStartMode) {
-          rangeStart = date;
-        } else {
+      if (this.props.rangeEnabled) {
+        if (selectStartDate && rangeStart.isSame(rangeEnd) && !date.isSame(rangeStart)) {
+          // First end date selection
           rangeEnd = date;
+          selectStartDate = false;
+        } else if (!selectStartDate && date.isBefore(rangeStart)) {
+          // Selected end date is before start date
+          rangeStart = date;
+          selectStartDate = true;
+        } else if (selectStartDate && date.isAfter(rangeEnd)) {
+          // Selected end date is before start date
+          rangeEnd = date;
+          selectStartDate = false;
+        } else if (selectStartDate && !date.isSame(rangeEnd)) {
+          // Regular start date selection
+          rangeStart = date;
+        } else if (!selectStartDate && !date.isSame(rangeStart)) {
+          // Regular end date selection
+          rangeEnd = date;
+        } else if (selectStartDate && date.isSame(rangeEnd)) {
+          // While selecting start date, chose end date
+          selectStartDate = false;
+        } else if (!selectStartDate && date.isSame(rangeStart)) {
+          // While selecting end date, chose start date
+          selectStartDate = true;
         }
-        selectStartMode = !this.state.selectStartMode;
+        this.setState({
+          rangeStart,
+          rangeEnd,
+          selectStartDate,
+        });
+        if (rangeEnd === date) {
+          // If selected day is rangeEnd, run onEndDateSelect callback
+          this.props.onEndDateSelect && this.props.onEndDateSelect(date ? date.format() : null,
+            rangeStart ? rangeStart.format() : null,
+            rangeEnd ? rangeEnd.format() : null );
+        } else {
+          // If selected day is rangeStart, run onDateSelect callback
+          this.props.onDateSelect && this.props.onDateSelect(date ? date.format() : null,
+            rangeStart ? rangeStart.format() : null,
+            rangeEnd ? rangeEnd.format() : null );
+        }
+        return;
       }
-      this.setState({
-        rangeStart,
-        rangeEnd,
-        selectStartMode,
-      });
-      if (rangeEnd === date) {
-        // If selected day is rangeEnd, run onEndDateSelect callback
-        this.props.onEndDateSelect && this.props.onEndDateSelect(date ? date.format() : null,
-          rangeStart ? rangeStart.format() : null,
-          rangeEnd ? rangeEnd.format() : null );
-      } else {
-        // If selected day is rangeStart, run onDateSelect callback
-        this.props.onDateSelect && this.props.onDateSelect(date ? date.format() : null,
-          rangeStart ? rangeStart.format() : null,
-          rangeEnd ? rangeEnd.format() : null );
-      }
-      return;
-    }
     // If range is disabled, run onDateSelect callback
     this.props.onDateSelect && this.props.onDateSelect(date ? date.format() : null,
       rangeStart ? rangeStart.format() : null,
