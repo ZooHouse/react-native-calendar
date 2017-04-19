@@ -26,11 +26,15 @@ class Calendar extends Component {
   state = {
     currentMonthMoment: moment(this.props.startDate),
     selectedMoment: moment(this.props.selectedDate),
+    selectedStartMoment: moment(this.props.selectedStartDate),
     selectedEndMoment: moment(this.props.selectedEndDate),
     rangeStart: moment(this.props.startDate),
-    rangeEnd: moment(this.props.startDate),
-    selectStartDate: true,
+    rangeEnd: moment(this.props.startDate), // Intentional
+    selectStartDate: this.props.selectStartDate,
+    disabledAfter: moment(this.props.disabledAfter),
+    disabledBefore: moment(this.props.disabledBefore),
     rowHeight: null,
+    firstSelection: true,
   };
 
   static propTypes = {
@@ -42,7 +46,11 @@ class Calendar extends Component {
       PropTypes.string,
       PropTypes.object
     ]),
+    disabledBefore: PropTypes.any,
+    disabledAfter: PropTypes.any,
+    selectStartDate: PropTypes.bool,
     onDateSelect: PropTypes.func,
+    onStartDateSelect: PropTypes.func,
     onEndDateSelect: PropTypes.func,
     onSwipeNext: PropTypes.func,
     onSwipePrev: PropTypes.func,
@@ -54,6 +62,7 @@ class Calendar extends Component {
     ]),
     scrollEnabled: PropTypes.bool,
     selectedDate: PropTypes.any,
+    selectedStartDate: PropTypes.any,
     selectedEndDate: PropTypes.any,
     showControls: PropTypes.bool,
     showEventIndicators: PropTypes.bool,
@@ -83,6 +92,8 @@ class Calendar extends Component {
     weekStart: 1,
     rangeEnabled: false,
     fadedRange: false,
+    disabledBefore: null,
+    disabledAfter: null,
   };
 
   componentDidMount() {
@@ -97,6 +108,15 @@ class Calendar extends Component {
   componentWillReceiveProps(nextProps) {
     if (nextProps.selectedDate && this.props.selectedDate !== nextProps.selectedDate) {
       this.setState({selectedMoment: nextProps.selectedDate});
+    }
+    if (this.props.selectStartDate !== nextProps.selectStartDate) {
+      this.setState({selectStartDate: nextProps.selectStartDate});
+    }
+    if (this.props.disabledBefore !== nextProps.disabledBefore) {
+      this.setState({disabledBefore: nextProps.disabledBefore});
+    }
+    if (this.props.disabledAfter !== nextProps.disabledAfter) {
+      this.setState({disabledAfter: nextProps.disabledAfter});
     }
     if (this.props.fadedRange && nextProps.selectedEndDate && this.props.selectedEndDate !== nextProps.selectedEndDate) {
       this.setState({selectedEndMoment: nextProps.selectedEndDate});
@@ -143,52 +163,42 @@ class Calendar extends Component {
     if (this.props.selectedDate === undefined) {
       this.setState({ selectedMoment: date });
     }
-    let rangeStart = this.state.rangeStart,
-      rangeEnd = this.state.rangeEnd,
-      selectStartDate = this.state.selectStartDate;
-
+    let rangeStart = this.state.rangeStart;
+    let rangeEnd = this.state.rangeEnd;
+    let selectStartDate = this.state.selectStartDate;
+    let firstSelection = this.state.firstSelection;
       if (this.props.rangeEnabled) {
-        if (selectStartDate && rangeStart.isSame(rangeEnd) && !date.isSame(rangeStart)) {
-          // First end date selection
+        if (firstSelection && selectStartDate) {
           rangeEnd = date;
-          selectStartDate = false;
-        } else if (!selectStartDate && date.isBefore(rangeStart)) {
-          // Selected end date is before start date
           rangeStart = date;
-          selectStartDate = true;
-        } else if (selectStartDate && date.isAfter(rangeEnd)) {
-          // Selected end date is before start date
+        } else if (firstSelection && !selectStartDate && date.isAfter(rangeStart)) {
           rangeEnd = date;
-          selectStartDate = false;
-        } else if (selectStartDate && !date.isSame(rangeEnd)) {
-          // Regular start date selection
+          firstSelection = false;
+        } else if (selectStartDate && date.isBefore(rangeEnd)) {
           rangeStart = date;
-        } else if (!selectStartDate && !date.isSame(rangeStart)) {
-          // Regular end date selection
+        } else if (!selectStartDate && date.isAfter(rangeStart)) {
           rangeEnd = date;
-        } else if (selectStartDate && date.isSame(rangeEnd)) {
-          // While selecting start date, chose end date
-          selectStartDate = false;
-        } else if (!selectStartDate && date.isSame(rangeStart)) {
-          // While selecting end date, chose start date
-          selectStartDate = true;
+        } else {
+          return;
         }
         this.setState({
           rangeStart,
           rangeEnd,
-          selectStartDate,
+          firstSelection,
         });
-        if (rangeEnd === date) {
-          // If selected day is rangeEnd, run onEndDateSelect callback
+        // If selected day is rangeEnd, run onEndDateSelect callback
+        this.state.rangeEnd != rangeEnd ?
           this.props.onEndDateSelect && this.props.onEndDateSelect(date ? date.format() : null,
-            rangeStart ? rangeStart.format() : null,
-            rangeEnd ? rangeEnd.format() : null );
-        } else {
-          // If selected day is rangeStart, run onDateSelect callback
-          this.props.onDateSelect && this.props.onDateSelect(date ? date.format() : null,
-            rangeStart ? rangeStart.format() : null,
-            rangeEnd ? rangeEnd.format() : null );
-        }
+            null,
+            rangeEnd ? rangeEnd.format() : null ) :
+          null;
+        // If selected day is rangeStart, run onStartDateSelect callback
+        this.state.rangeStart != rangeStart ?
+          this.props.onStartDateSelect && this.props.onStartDateSelect(date ? date.format() : null,
+            rangeStart ? rangeStart.format() : null
+          ) :
+          null;
+
         return;
       }
     // If range is disabled, run onDateSelect callback
@@ -235,6 +245,34 @@ class Calendar extends Component {
     }
   }
 
+  isDisabled = (dayIndex, startOfArgMonthMoment) => {
+    beforeIndex = moment(this.state.disabledBefore).date() - 1;
+    afterIndex = moment(this.state.disabledAfter).date() - 1;
+    // Case 1: current month is before disabledBefore month, return true
+    if (this.state.disabledBefore &&
+        startOfArgMonthMoment.isBefore(this.state.disabledBefore, 'month')) {
+      return true;
+    }
+    // Case 2: current month is after disabledAfter month, return true
+    if (this.state.disabledAfter &&
+        startOfArgMonthMoment.isAfter(this.state.disabledAfter, 'month')) {
+      return true;
+    }
+    // Case 3: current month is same as disabledBefore month and dayIndex is before beforeIndex, return true
+    if (this.state.disabledBefore &&
+        startOfArgMonthMoment.isSame(this.state.disabledBefore, 'month') &&
+        dayIndex < beforeIndex) {
+      return true;
+    }
+    // Case 4: current month is same as disabledAfter month and dayIndex is after afterIndex, return true
+    if (this.state.disabledAfter &&
+        startOfArgMonthMoment.isSame(this.state.disabledAfter, 'month') &&
+        dayIndex > afterIndex) {
+      return true;
+    }
+    return false;
+  }
+
   renderMonthView(argMoment, eventsMap) {
     let
       renderIndex = 0,
@@ -270,7 +308,6 @@ class Calendar extends Component {
     do {
       const dayIndex = renderIndex - offset;
       const isoWeekday = (renderIndex + weekStart) % 7;
-
       if (dayIndex >= 0 && dayIndex < argMonthDaysCount) {
         days.push((
           <Day
@@ -295,6 +332,7 @@ class Calendar extends Component {
             event={events && events[dayIndex]}
             showEventIndicators={this.props.showEventIndicators}
             customStyle={this.props.customStyle}
+            disabled={this.isDisabled(dayIndex, startOfArgMonthMoment)}
           />
         ));
       } else {
