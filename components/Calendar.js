@@ -28,9 +28,9 @@ class Calendar extends Component {
     selectedMoment: moment(this.props.selectedDate),
     selectedStartMoment: moment(this.props.selectedStartDate),
     selectedEndMoment: moment(this.props.selectedEndDate),
-    rangeStart: moment(this.props.startDate),
-    rangeEnd: moment(this.props.startDate), // Intentional
-    selectStartDate: this.props.selectStartDate,
+    rangeStart: moment(this.props.selectedStartDate),
+    rangeEnd: moment(this.props.selectedEndDate),
+    selectStartDate: this.props.selectStartDate && this.props.selectedEndDate === this.props.selectedStartDate,
     disabledAfter: moment(this.props.disabledAfter),
     disabledBefore: moment(this.props.disabledBefore),
     rowHeight: null,
