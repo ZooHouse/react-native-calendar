@@ -29,13 +29,13 @@ const styles = StyleSheet.create({
   },
   dayHeading: {
     flex: 1,
-    fontSize: 12,
+    fontSize: 16,
     textAlign: 'center',
     marginVertical: 10,
   },
   weekendHeading: {
     flex: 1,
-    fontSize: 12,
+    fontSize: 16,
     textAlign: 'center',
     marginVertical: 10,
   },
@@ -57,6 +57,11 @@ const styles = StyleSheet.create({
   day: {
     fontSize: 16,
     alignSelf: 'center',
+  },
+  disabledDay: {
+    fontSize: 16,
+    alignSelf: 'center',
+    color: 'grey',
   },
   eventIndicatorFiller: {
     marginTop: 3,
