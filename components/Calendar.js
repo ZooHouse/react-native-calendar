@@ -88,7 +88,7 @@ class Calendar extends Component {
     showEventIndicators: false,
     startDate: moment().format('YYYY-MM-DD'),
     titleFormat: 'MMMM YYYY',
-    today: moment(),
+    today: moment().format('YYYY-MM-DD'),
     weekStart: 1,
     rangeEnabled: false,
     fadedRange: false,
