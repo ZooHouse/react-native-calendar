@@ -29,13 +29,13 @@ const styles = StyleSheet.create({
   },
   dayHeading: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 15,
     textAlign: 'center',
     marginVertical: 10,
   },
   weekendHeading: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 15,
     textAlign: 'center',
     marginVertical: 10,
   },
@@ -55,11 +55,11 @@ const styles = StyleSheet.create({
     height: DEVICE_WIDTH / 7,
   },
   day: {
-    fontSize: 16,
+    fontSize: 15,
     alignSelf: 'center',
   },
   disabledDay: {
-    fontSize: 16,
+    fontSize: 15,
     alignSelf: 'center',
     color: 'grey',
   },
@@ -76,11 +76,11 @@ const styles = StyleSheet.create({
   dayCircleFiller: {
     justifyContent: 'center',
     backgroundColor: 'transparent',
-    width: 28,
-    height: 28,
-    left: (DEVICE_WIDTH / 14) - 14,
-    top: (DEVICE_WIDTH / 14) - 14,
-    borderRadius: 14,
+    width: 40,
+    height: 40,
+    left: (DEVICE_WIDTH / 14) - 20,
+    top: (DEVICE_WIDTH / 14) - 20,
+    borderRadius: 20,
     position: 'absolute',
   },
   currentDayCircle: {
@@ -111,17 +111,17 @@ const styles = StyleSheet.create({
   },
   selectedRangeBar: {
     width: DEVICE_WIDTH / 14,
-    height: 28,
+    height: 40,
     backgroundColor: '#F22169',
   },
   selectedFadedRangeBar: {
     width: DEVICE_WIDTH / 14,
-    height: 28,
+    height: 40,
     backgroundColor: '#FFA5C5',
   },
   emptyRangeBar: {
     width: DEVICE_WIDTH / 14,
-    height: 28,
+    height: 40,
     backgroundColor: 'transparent',
   },
 });
