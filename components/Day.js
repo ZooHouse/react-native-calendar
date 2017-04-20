@@ -12,6 +12,7 @@ export default class Day extends Component {
   static defaultProps = {
     customStyle: {},
     fadedRange: false,
+    disabled: false,
   }
 
   static propTypes = {
@@ -29,6 +30,7 @@ export default class Day extends Component {
     fadedRange: PropTypes.bool,
     onPress: PropTypes.func,
     showEventIndicators: PropTypes.bool,
+    disabled: PropTypes.bool,
   }
 
   dayButtonStyle = (isInRange, isThurs) => {
@@ -65,9 +67,14 @@ export default class Day extends Component {
     return dayCircleStyle;
   }
 
-  dayTextStyle = (isWeekend, isSelected, isToday, isInRange, isStartRange, isEndRange, event) => {
+  dayTextStyle = (isWeekend, isSelected, isToday, isInRange, isStartRange, isEndRange, disabled, event) => {
     const { customStyle } = this.props;
     const dayTextStyle = [styles.day, customStyle.day];
+
+    if (disabled) {
+      dayTextStyle.push(styles.disabledDay, customStyle.disabledDay);
+      return dayTextStyle;
+    }
 
     if (isToday && !isSelected) {
       dayTextStyle.push(styles.currentDayText, customStyle.currentDayText);
@@ -101,8 +108,8 @@ export default class Day extends Component {
       isEndRange,
       fadedRange,
       showEventIndicators,
+      disabled,
       } = this.props;
-
     return filler
       ? (
         <TouchableWithoutFeedback>
@@ -112,7 +119,7 @@ export default class Day extends Component {
         </TouchableWithoutFeedback>
       )
       : (
-        <TouchableOpacity onPress={this.props.onPress}>
+        <TouchableOpacity onPress={!this.props.disabled ? this.props.onPress : () => {}}>
           <View style={this.dayButtonStyle(isInRange, isThurs)}>
             {
               (isInRange || isEndRange) && !isStartRange ?
@@ -140,7 +147,7 @@ export default class Day extends Component {
             >
               <Text
                 style={this.dayTextStyle(isWeekend, isSelected, isToday,
-                  isInRange, isStartRange, isEndRange, event)}
+                  isInRange, isStartRange, isEndRange, disabled, event)}
               >
                 {caption}
               </Text>
