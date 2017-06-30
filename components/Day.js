@@ -13,6 +13,8 @@ export default class Day extends Component {
     customStyle: {},
     fadedRange: false,
     disabled: false,
+    multiRangeMode: false,
+    inSelectedRange: false,
   }
 
   static propTypes = {
@@ -31,6 +33,8 @@ export default class Day extends Component {
     onPress: PropTypes.func,
     showEventIndicators: PropTypes.bool,
     disabled: PropTypes.bool,
+    multiRangeMode: PropTypes.bool,
+    inSelectedRange: PropTypes.bool,
   }
 
   dayButtonStyle = (isInRange, isThurs) => {
@@ -39,20 +43,37 @@ export default class Day extends Component {
     return dayButtonStyle;
   }
 
-  dayCircleStyle = (isWeekend, isSelected, isToday, isStartRange, isEndRange, event) => {
+  dayCircleStyle = (
+    isWeekend,
+    isSelected,
+    isToday,
+    isStartRange,
+    isEndRange,
+    multiRangeMode,
+    inSelectedRange,
+    event,
+  ) => {
     const { customStyle } = this.props;
     const dayCircleStyle = [styles.dayCircleFiller, customStyle.dayCircleFiller];
-
-    if (isSelected) {
-      if (isToday) {
-        dayCircleStyle.push(styles.currentDayCircle, customStyle.currentDayCircle);
-      } else {
+    /* Multi Range Mode*/
+    if (multiRangeMode) {
+      if (inSelectedRange && (isStartRange || isEndRange)) {
+        dayCircleStyle.push(styles.selectedDayCircle, customStyle.multiRangeSelectedStyle);
+      } else if (isStartRange || isEndRange) {
+        dayCircleStyle.push(styles.selectedDayCircle, customStyle.multiRangeUnselectedStyle);
+      }
+    /* Regular Mode */
+    } else {
+      if (isSelected) {
+        if (isToday) {
+          dayCircleStyle.push(styles.currentDayCircle, customStyle.currentDayCircle);
+        } else {
+          dayCircleStyle.push(styles.selectedDayCircle, customStyle.selectedDayCircle);
+        }
+      }
+      if (isStartRange || isEndRange) {
         dayCircleStyle.push(styles.selectedDayCircle, customStyle.selectedDayCircle);
       }
-    }
-
-    if (isStartRange || isEndRange) {
-      dayCircleStyle.push(styles.selectedDayCircle, customStyle.selectedDayCircle);
     }
 
     if (event) {
@@ -67,7 +88,18 @@ export default class Day extends Component {
     return dayCircleStyle;
   }
 
-  dayTextStyle = (isWeekend, isSelected, isToday, isInRange, isStartRange, isEndRange, disabled, event) => {
+  dayTextStyle = (
+    isWeekend,
+    isSelected,
+    isToday,
+    isInRange,
+    isStartRange,
+    isEndRange,
+    disabled,
+    multiRangeMode,
+    inSelectedRange,
+    event,
+  ) => {
     const { customStyle } = this.props;
     const dayTextStyle = [styles.day, customStyle.day];
 
@@ -79,7 +111,11 @@ export default class Day extends Component {
     if (isToday && !isSelected) {
       dayTextStyle.push(styles.currentDayText, customStyle.currentDayText);
     } else if (isToday || isSelected) {
-      dayTextStyle.push(styles.selectedDayText, customStyle.selectedDayText);
+      if (multiRangeMode && !inSelectedRange) {
+        dayTextStyle.push(styles.currentDayText, customStyle.currentDayText);
+      } else {
+        dayTextStyle.push(styles.selectedDayText, customStyle.selectedDayText);
+      }
     } else if (isWeekend) {
       dayTextStyle.push(styles.weekendDayText, customStyle.weekendDayText);
     }
@@ -92,6 +128,19 @@ export default class Day extends Component {
       dayTextStyle.push(styles.hasEventText, customStyle.hasEventText, event.hasEventText);
     }
     return dayTextStyle;
+  }
+
+  rangeStyle = (fadedRange, multiRangeMode, inSelectedRange) => {
+    const { customStyle } = this.props;
+    if (multiRangeMode) {
+      if (inSelectedRange) {
+        return [styles.selectedRangeBar, customStyle.selectedMultiRangeBar];
+      }
+      return [styles.selectedFadedRangeBar, customStyle.unselectedMultiRangeBar];
+    } else if (fadedRange) {
+      return styles.selectedFadedRangeBar;
+    }
+    return styles.selectedRangeBar;
   }
 
   render() {
@@ -109,6 +158,8 @@ export default class Day extends Component {
       fadedRange,
       showEventIndicators,
       disabled,
+      multiRangeMode,
+      inSelectedRange,
       } = this.props;
     return filler
       ? (
@@ -124,30 +175,25 @@ export default class Day extends Component {
             {
               (isInRange || isEndRange) && !isStartRange ?
                 <View
-                  style={
-                    fadedRange ?
-                    styles.selectedFadedRangeBar :
-                    styles.selectedRangeBar
-                  } /> :
+                  style={this.rangeStyle(fadedRange, multiRangeMode, inSelectedRange)}
+                /> :
                 <View style={styles.emptyRangeBar} />
             }
             {
               (isInRange || isStartRange) && !isEndRange ?
                 <View
-                  style={
-                    fadedRange ?
-                    styles.selectedFadedRangeBar :
-                    styles.selectedRangeBar
-                  } /> :
+                  style={this.rangeStyle(fadedRange, multiRangeMode, inSelectedRange)}
+                /> :
                 <View style={styles.emptyRangeBar} />
             }
             <View
               style={this.dayCircleStyle(isWeekend, isSelected,
-              isToday, isStartRange, isEndRange, event)}
+              isToday, isStartRange, isEndRange, multiRangeMode, inSelectedRange, event)}
             >
               <Text
                 style={this.dayTextStyle(isWeekend, isSelected, isToday,
-                  isInRange, isStartRange, isEndRange, disabled, event)}
+                  isInRange, isStartRange, isEndRange, disabled,
+                  multiRangeMode, inSelectedRange, event)}
               >
                 {caption}
               </Text>
