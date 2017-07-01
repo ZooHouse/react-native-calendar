@@ -254,20 +254,20 @@ class Calendar extends Component {
         rangeStart,
         rangeEnd,
         firstSelection,
+      }, () => {
+        // If selected day is rangeEnd, run onEndDateSelect callback
+        this.state.rangeEnd !== rangeEnd ?
+          this.props.onEndDateSelect && this.props.onEndDateSelect(date ? date.format() : null,
+            null,
+            rangeEnd ? rangeEnd.format() : null) :
+          null;
+        // If selected day is rangeStart, run onStartDateSelect callback
+        this.state.rangeStart !== rangeStart ?
+          this.props.onStartDateSelect && this.props.onStartDateSelect(date ? date.format() : null,
+            rangeStart ? rangeStart.format() : null
+          ) :
+          null;
       });
-      // If selected day is rangeEnd, run onEndDateSelect callback
-      this.state.rangeEnd !== rangeEnd ?
-        this.props.onEndDateSelect && this.props.onEndDateSelect(date ? date.format() : null,
-          null,
-          rangeEnd ? rangeEnd.format() : null) :
-        null;
-      // If selected day is rangeStart, run onStartDateSelect callback
-      this.state.rangeStart !== rangeStart ?
-        this.props.onStartDateSelect && this.props.onStartDateSelect(date ? date.format() : null,
-          rangeStart ? rangeStart.format() : null
-        ) :
-        null;
-
       return;
     }
     // If range is disabled, run onDateSelect callback
