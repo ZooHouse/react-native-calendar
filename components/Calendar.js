@@ -95,15 +95,15 @@ class Calendar extends Component {
 
   state = {
     currentMonthMoment: moment(this.props.startDate),
-    selectedMoment: moment(this.props.selectedDate),
+    selectedMoment: this.props.selectedDate ? moment(this.props.selectedDate) : null,
     selectedStartMoment: moment(this.props.selectedStartDate),
     selectedEndMoment: moment(this.props.selectedEndDate),
     rangeStart: moment(this.props.selectedStartDate),
     rangeEnd: moment(this.props.selectedEndDate),
     selectStartDate: this.props.selectStartDate &&
                      this.props.selectedEndDate === this.props.selectedStartDate,
-    disabledAfter: moment(this.props.disabledAfter),
-    disabledBefore: moment(this.props.disabledBefore),
+    disabledAfter: this.props.disabledAfter ? moment(this.props.disabledAfter) : null,
+    disabledBefore: this.props.disabledBefore ? moment(this.props.disabledBefore) : null,
     rowHeight: null,
     firstSelection: true,
     multiRangeMode: this.props.multiRangeMode,
@@ -255,18 +255,9 @@ class Calendar extends Component {
         rangeEnd,
         firstSelection,
       }, () => {
-        // If selected day is rangeEnd, run onEndDateSelect callback
-        this.state.rangeEnd !== rangeEnd ?
-          this.props.onEndDateSelect && this.props.onEndDateSelect(date ? date.format() : null,
-            null,
-            rangeEnd ? rangeEnd.format() : null) :
-          null;
-        // If selected day is rangeStart, run onStartDateSelect callback
-        this.state.rangeStart !== rangeStart ?
-          this.props.onStartDateSelect && this.props.onStartDateSelect(date ? date.format() : null,
-            rangeStart ? rangeStart.format() : null
-          ) :
-          null;
+        this.props.selectStartDate ?
+          this.props.onStartDateSelect && this.props.onStartDateSelect(date.format()) :
+          this.props.onEndDateSelect && this.props.onEndDateSelect(date.format());
       });
       return;
     }
@@ -297,8 +288,6 @@ class Calendar extends Component {
   }
 
   isDisabled = (dayIndex, startOfArgMonthMoment) => {
-    const beforeIndex = moment(this.state.disabledBefore).date() - 1;
-    const afterIndex = moment(this.state.disabledAfter).date() - 1;
     /* Case 1: current month is before disabledBefore month, return true */
     if (this.state.disabledBefore &&
         startOfArgMonthMoment.isBefore(this.state.disabledBefore, 'month')) {
@@ -313,17 +302,21 @@ class Calendar extends Component {
      * dayIndex is before beforeIndex, return true
      */
     if (this.state.disabledBefore &&
-        startOfArgMonthMoment.isSame(this.state.disabledBefore, 'month') &&
-        dayIndex < beforeIndex) {
-      return true;
+        startOfArgMonthMoment.isSame(this.state.disabledBefore, 'month')) {
+      const beforeIndex = moment(this.state.disabledBefore).date() - 1;
+      /* The reason this isn't:
+       *    return dayIndex < beforeIndex;
+       * is because if it returns false, we want it to make the next check below
+       */
+      if (dayIndex < beforeIndex) return true;
     }
     /* Case 4: current month is same as disabledAfter month and
      * dayIndex is after afterIndex, disabled
      */
     if (this.state.disabledAfter &&
-        startOfArgMonthMoment.isSame(this.state.disabledAfter, 'month') &&
-        dayIndex > afterIndex) {
-      return true;
+        startOfArgMonthMoment.isSame(this.state.disabledAfter, 'month')) {
+      const afterIndex = moment(this.state.disabledAfter).date() - 1;
+      if (dayIndex > afterIndex) return true;
     }
     return false;
   }
@@ -414,7 +407,7 @@ class Calendar extends Component {
       startOfArgMonthMoment = argMoment.startOf('month');
 
     const
-      selectedMoment = moment(this.props.selectedMoment),
+      selectedMoment = this.state.selectedMoment ? moment(this.state.selectedMoment) : null,
       fadedRange = this.props.fadedRange,
       rangeStart = moment(this.state.rangeStart),
       rangeEnd = moment(this.state.rangeEnd),
@@ -424,8 +417,8 @@ class Calendar extends Component {
       argMonthDaysCount = argMoment.daysInMonth(),
       offset = ((startOfArgMonthMoment.isoWeekday() - weekStart) + 7) % 7,
       argMonthIsToday = argMoment.isSame(todayMoment, 'month'),
-      selectedIndex = moment(selectedMoment).date() - 1,
-      selectedMonthIsArg = selectedMoment.isSame(argMoment, 'month');
+      selectedIndex = selectedMoment ? moment(selectedMoment).date() - 1 : null,
+      selectedMonthIsArg = argMoment.isSame(selectedMoment, 'month');
 
     const events = (eventsMap !== null)
       ? eventsMap[argMoment.startOf('month').format()]
